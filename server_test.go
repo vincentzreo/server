@@ -121,6 +121,7 @@ func TestLeague(t *testing.T) {
 		server.ServeHTTP(response, request)
 
 		got := getLeagueFromResponse(t, response.Body)
+		assertContentType(t, response, jsonContentType)
 		assertStatus(t, response.Code, http.StatusOK)
 		assertLeague(t, got, wantedLeague)
 	})
@@ -133,6 +134,15 @@ func getLeagueFromResponse(t *testing.T, body io.Reader) (league []Player) {
 		t.Fatalf("Unable to parse response from server '%s' into slice of Player, '%v'", body, err)
 	}
 	return
+}
+
+const jsonContentType = "application/json"
+
+func assertContentType(t *testing.T, response *httptest.ResponseRecorder, want string) {
+	t.Helper()
+	if response.Header().Get("content-type") != want {
+		t.Errorf("response did not have content-type of %s, got %v", want, response.Result())
+	}
 }
 func assertLeague(t *testing.T, got, want []Player) {
 	t.Helper()
